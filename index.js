@@ -20,7 +20,9 @@ const max_sizes = {
 }
 
 const copy_big_images = () => {
-    return new Promise((resolve) => {
+
+    return new Promise( resolve => {
+
         fs.readdir(original_folder, (err, files) => {
 
             files.forEach(file => {
@@ -46,7 +48,9 @@ const copy_big_images = () => {
 };
 
 const compress_big_images = () => {
-    return new Promise((resolve) => {
+
+    return new Promise( resolve => {
+
         compress_images(INPUT_PATH, OUTPUT_PATH, { compress_force: false, statistic: true, autoupdate: true }, false,
             { jpg: { engine: "mozjpeg", command: ["-quality", "60"] } },
             { png: { engine: "pngquant", command: ["--quality=20-50", "-o"] } },
@@ -61,17 +65,14 @@ const compress_big_images = () => {
                 resolve();
             }
         );
+
     });
 };
 
 async function do_the_thing() {
 
-    const copy = await copy_big_images();
-
-    if (copy) {
-        console.log('Comprimimos imagenes');
-        await compress_big_images();
-    }
+    await copy_big_images();
+    await compress_big_images();
 
 }
 
