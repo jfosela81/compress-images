@@ -19,55 +19,58 @@ const max_sizes = {
     SVG: 100,
 }
 
-const copy_big_images = () =>{
+const copy_big_images = () => {
+    return new Promise((resolve) => {
+        fs.readdir(original_folder, (err, files) => {
 
-    fs.readdir( original_folder, (err, files) => {
+            files.forEach(file => {
 
-        files.forEach( file => {
-            
-            fs.stat( original_folder + file, ( err, stats ) => {
-                console.log( 'Fichero', original_folder + file );    
-                const extension = file.slice( file.lastIndexOf( '.' ) + 1, file.length );
-    
-                if ( stats.size / 1024 > max_sizes[extension] ) {
-                    console.log( extension );
-    
-                    fs.copyFile( original_folder + file, big_images + file, err => {
-                        if (err) throw err;
-                        console.log( 'Hecho' );
-                    });
-                }
-    
+                fs.stat(original_folder + file, (err, stats) => {
+                    console.log('Fichero', original_folder + file);
+                    const extension = file.slice(file.lastIndexOf('.') + 1, file.length);
+
+                    if (stats.size / 1024 > max_sizes[extension]) {
+                        console.log(extension);
+
+                        fs.copyFile(original_folder + file, big_images + file, err => {
+                            if (err) throw err;
+                            console.log('Hecho');
+                            resolve();
+                        });
+                    }
+
+                });
             });
         });
     });
 };
 
 const compress_big_images = () => {
-
-    compress_images(INPUT_PATH, OUTPUT_PATH, { compress_force: false, statistic: true, autoupdate: true }, false,
-        { jpg: { engine: "mozjpeg", command: ["-quality", "60"] } },
-        { png: { engine: "pngquant", command: ["--quality=20-50", "-o"] } },
-        { svg: { engine: "svgo", command: "--multipass" } },
-        { gif: { engine: "gifsicle", command: ["--colors", "64", "--use-col=web"] } },
-        function (error, completed, statistic) {
-            console.log("-------------");
-            console.log(error);
-            console.log(completed);
-            console.log(statistic);
-            console.log("-------------");
-        }
-    );
-
+    return new Promise((resolve) => {
+        compress_images(INPUT_PATH, OUTPUT_PATH, { compress_force: false, statistic: true, autoupdate: true }, false,
+            { jpg: { engine: "mozjpeg", command: ["-quality", "60"] } },
+            { png: { engine: "pngquant", command: ["--quality=20-50", "-o"] } },
+            { svg: { engine: "svgo", command: "--multipass" } },
+            { gif: { engine: "gifsicle", command: ["--colors", "64", "--use-col=web"] } },
+            function (error, completed, statistic) {
+                console.log("-------------");
+                console.log(error);
+                console.log(completed);
+                console.log(statistic);
+                console.log("-------------");
+                resolve();
+            }
+        );
+    });
 };
 
 async function do_the_thing() {
 
     const copy = await copy_big_images();
 
-    if ( copy ) {
+    if (copy) {
         console.log('Comprimimos imagenes');
-        //await compress_big_images();
+        await compress_big_images();
     }
 
 }
